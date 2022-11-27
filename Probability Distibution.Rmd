@@ -1,0 +1,68 @@
+---
+title: "Probability Distribution"
+author: "pronak@business.rutgers.edu"
+date: "2/24/2022"
+output: html_document
+---
+
+R has robust probability functions specific to the six distribution type.
+
+-   for normal distribution, the function is **norm**
+-   for binomial distribution, the function is **binom**
+-   for poisson distribution, the function is **pois**
+-   for t distribution, the function is ***t***
+-   for F distribution, the function is **f**
+-   for Chi Square distribution, the function is **chisq**
+
+For each of these six distribution types, there are 4 function to assist the user with many thing probability related.
+
+-   **d** gives density. Hence, dbinom gives binomial density. It is a probability for a specific value.
+
+-   **p** gives distribution function. Hence, pbinom gives binomial distribution. It is probability for cumulative probability.
+
+-   **r** gives random numbers that mirror the distribution. Hence, rbinom gives random numbers mirroring binomial distribution.
+
+-   **q** gives quantile. It gives the cutoff.. so think of it as inverse distribution.
+
+Hence these $nk=24$ functions, `[d|p|q|r][norm|binom|t|pois|f|chisq],` gives us everything we need to answer any type questions related to probability. Lets try them out!
+
+---
+
+Instead of remembering equations like the ones below
+
+*Binomial Distribution Equation*:
+
+$$P(X|\theta,N) = \frac{N!}{X!(N-X)!}  {\theta ^X (1-\theta)^{N-X}}$$
+
+Normal Distribution Function:
+
+$$
+p(X|\mu,\sigma) = \frac{1}{\sqrt{2\pi\sigma}}exp(-\frac{(X-\mu)^2}{2\sigma^2})
+$$
+
+---
+
+You can just have R do the heavy lift and you ask the right questions using the above formula. As an example
+
+```{r}
+### what is the probability of getting 5 heads when you flip the coin 10 times? 
+dbinom(5,10,.5)
+### What is the probability of getting 5 or less heads when you flip the coin 10 times? 
+pbinom(5,10,.5)
+### Random outcome of 10 coin flips
+rbinom(10,1,.5)
+### Random outcome of 100 flips of 10 coins
+rbinom(100,10,.5)
+### How many tails consstibutes 25% probablity? 
+qbinom(.25,10,.5)
+### Mean number of customers who arrive per minute at a bank during noon to 1 pm is 3. What is the probability that 2 customers arrive in a given minute? This is a Poission distribution. So we use "d" with "pois" to give us dpois!
+dpois(2,3)
+### Love your table of probablities for z score? thats your pnorm function
+pnorm(2)
+### of if you say probablity having 200 or les dollars when mean is 100 and std dev is 50
+pnorm(200,100,50)
+### Give random numbers fitting a normal distribution
+rnorm(10,100,50)
+### How many dollars to ensure 98% probablity? 
+qnorm(.9772499,100,50)
+```

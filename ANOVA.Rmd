@@ -1,0 +1,192 @@
+---
+title: "ANOVA"
+author: "pronak@business.rutgers.edu"
+date: "4/4/2022"
+output: html_document
+---
+
+### Definition
+
+ANOVA stands for **AN**alysis **O**f **V**ariance. It is a statistical technique, commonly used to study differences between two or more group means. 
+
+### Details
+
+It is an extension of the t-test. It is used when a factor variable had more than one group.T-Test is used to compare 2 groups. ANOVA generalizes the t-test beyond 2 groups. If you have the time, you can perform t-test between each combination of groups or save yourself time and use ANOVA!
+
+This test, like any other statistical tests, gives evidence whether the H0 hypothesis can be accepted or rejected.
+
+$H_0$ The means between groups are identical
+$H_1$ At least, the mean of one group is different
+
+In other words, the $H_0$ hypothesis implies that there is not enough evidence to prove the mean of the group (factor) are different from another.It wont tell you which group is different if $H_0$ is rejected. 
+
+
+### ANOVA Uses Cases
+* Student t-Test is used to compare means of 2 groups to see if there are significant differences ANOVA generalizes the t-test beyond 2 groups, so it is used to compare 3 or more groups. 
+
+There are many different types of ANOVA. We will focus on 
+
+* One-Way ANOVA
+  * Evaluate the difference among the means of three or more groups. Suppose there are 3 sales teams (A,B,C) and you have sales performance of individual members of each team. One-Way ANOVA will tell you in the three sales groups have similar performances. 
+* Two-Way ANOVA
+  * Two factors of interest on the dependent variable
+  * Interaction between the different levels of these two factors
+
+### Randomized Control Trials
+
+* Investigator controls one or more factors of interest.
+* Each factor contains two or more levels.
+* Levels can be numerical or categorical.
+* Different levels produce different groups. Think of each group as a sample from a different population.
+ Observe effects on the dependent variable.Are the groups the same?
+* Experimental design: the plan used to collect the data.
+* Experimental units (subjects) are assigned randomly to groups. Subjects are assumed homogeneous. 
+* Only one factor or independent variable.With two or more levels.
+* Perform One-Way ANOVA
+
+### Assumptions
+
+ANOVA assumes each factor is
+
+* randomly sampled
+* independent
+* normally distributed population
+* unknown but equal variances
+
+### Metric
+
+The F-statistic is the metric for ANOVA. It stands for Fisher's Probability Distribution. $F_{STAT} = \frac{Variance_{Between}}{Variance_{Within}}$
+
+SST = SSA (Variaion due to the factor ) + SSW  (Random Error)
+
+$$
+SST = \sum_{j=1}^{c}\sum_{i=1}^{n_j}(X_{ij} - \bar{\bar{X}})^2
+$$
+
+$$
+SSA = \sum_{j=1}^{c}n_j(\bar{X_j} - \bar{\bar{X}})^2
+$$
+
+$$
+SSW = \sum_{j=1}^{c}\sum_{i=1}^{n_j}(X_{ij} - \bar{X_j})^2
+$$
+
+#### Summary Table
+
+| Source of Variation | Degree of Freedom (df) | Sum of Square (SS) | Mean Square (MS) | F       |
+|--------------------|------------------------|--------------------|------------------|---------|
+| Among Group        | c-1                    | SSA                | MSA = SSA / c-1  | MSA/MSW |
+| Within Group       | n - c                  | SSW                | MSW - SSQ / n -c |         |
+| Total              | n -1                   | SST                |                  |         |
+
+#### Details
+
+To compute the F-statistic, you need to divide the between-group variability over the within-group variability. It is very intuitive to understand the F-statistic. If the numerator increases, it means the between-group variability is high, and it is likely the groups in the sample are drawn from completely different distributions. In other words, a low F-statistic indicates little or no significant difference between the group’s average
+
+The between-group variability reflects the differences between the groups inside all of the population. 
+
+The within group variability considers the difference between the groups. The variation comes from the individual observations: some points might be totally different than the group means. The within group variability picks up this effect and refer to the sampling error. You increased the spread of each sample and it is clear the individual variance is large. The $F_{STAT}$ will decrease, meaning you tend to accept the null hypothesis. It leads to an increase of the F-test and tends in favor of the alternative hypothesis.
+
+
+
+
+### F Table Lookup
+
+* F critical value is found in the F table. You can also use R.
+* You have to supply two degrees of freedom, Numerator (df1 or Column) and Denominator (df2 or row). The larger Sample Variance is always the numerator
+
+```{r}
+
+## False means return to the right of the curve
+qf(p=0.05, df1=4, df2=5, lower.tail=FALSE)
+
+## Draw a F Distribution
+set.seed(53535)   # Set seed for reproducibility
+N <- 10000  # Specify sample size
+y_rf <- rf(N, df1 = 3, df2 = 5) # Draw N F-distributed values
+# Plot of randomly drawn f density
+hist(y_rf,breaks = 500,main = "Ronak's F Distribution",xlim = c(0, 15))
+```
+
+### Other Uses of F Statistics
+
+* Testing for the ratios of two proportion variances. 
+$H_0$ = $\sigma_1^2 = \sigma_2^2$  and $H_0$  $\sigma_1^2 \ne \sigma_2^2$
+or $H_0$ = $\sigma_1^2 \le \sigma_2^2$ and $H_0$ = $\sigma_1^2 > \sigma_2^2$
+
+$$
+F_{STAT} = \frac{S_1^2}{S_2^2}
+
+$$
+ $S_1^2$ = Variance of Sample 1 with size $n_1$ and degree of freedom $n_1 - 1$
+
+ $S_2^2$ = Variance of Sample 1 with size $n_2$ and degree of freedom $n_2 - 1$
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+PATH <- "https://raw.githubusercontent.com/guru99-edu/R-Programming/master/poisons.csv"
+df <- read.csv(PATH) %>%
+select(-X) %>% 
+mutate(poison = factor(poison, ordered = TRUE))
+glimpse(df)
+levels(df$poison)
+### H_0 = There is no difference in survival time average between group
+### H_1 = The survival time average is different for at least one group
+
+# Lets get means and sd
+
+df %>%
+	group_by(poison) %>%
+	summarise(count_poison = n(),
+		mean_time = mean(time, na.rm = TRUE),
+		sd_time = sd(time, na.rm = TRUE))
+
+## Before we run ANOVA , let see what our eyes say
+
+ggplot(df, aes(x = poison, y = time, fill = poison)) +
+    geom_boxplot() +
+    geom_jitter(shape = 15,
+        color = "steelblue",
+        position = position_jitter(0.21)) +
+    theme_classic()
+anova_one_way <- aov(time~poison, data = df)
+summary(anova_one_way)
+##plot(anova_one_way)
+
+## More than one way!
+oneway.test(time~poison,
+  data = df,
+  var.equal = TRUE # assuming equal variances
+)
+# ANOVA Does not tell us which group is different. We need another test. 
+
+temp <- TukeyHSD(anova_one_way)
+temp
+plot(temp)
+
+### lwr = Lower bound of the difference in mean between group
+### upr = Upper bound of the difference in mean between group
+### Adjusted p-value when there are multiple groups
+
+### TWO WAY ANOVA
+
+###Treat variable indicates the treatment given to the Guinea pig. ###Lets see if there is a statistical dependence
+### between the poison and treatment given to the Guinea pig.
+
+anova_two_way <- aov(time~poison + treat, data = df)
+summary(anova_two_way)
+
+### We conclude that both poison and treat are statistically different from 0. 
+### We reject the NULL hypothesis and confirm that changing the treatment or the poison impact the time of survival.
+```
+
+### R code summary
+
+| Test     | Code                    |
+|----------|-------------------------|
+| One-Way  | aov(y~x, data = df)     |
+| Two-Way  | aov(y~X1+X2, data = df) |
+| Pairwise | TukeyHSD(ANOVA summary) |
+

@@ -1,0 +1,171 @@
+---
+title: "Sampling Distribution Lecture"
+author: "pronak@business.rutgers.edu"
+date: "2/26/2022"
+output: html_document
+---
+
+## Magic of sampling
+
+Lets say we know population mean is $\mu$ and std dev is $\sigma$. 
+You take the sample samples from this population of size n. 
+
+Lets say the sample mean is $\mu_\bar{X}$ and std dev is $\sigma_\bar{X}$. 
+
+$\mu_\bar{x} = \mu$ and $sigma_\bar{x} = \sigma / \sqrt{n}$
+
+We call $\sigma_\bar{x}$ as Standard Error. Based on the formula, as n goes up Standard Error goes down!
+
+Magic is as long as n is large enough, you will see a normal distribution happening even if population distribution is not uniform. Let me demonstrate. 
+
+```{r}
+x = rnorm(n=100, mean=0, sd=1)
+mean(x)
+hist(x, main="Sample Distribution")
+# Lets take large samples of 100000
+R = 100000
+xbar = double(R)
+for(r in 1:R){
+    x = rnorm(n=100, mean=0, sd=1)
+    xbar[r] = mean(x)
+}
+hist(xbar, main="Sampling Distribution of Xbar")
+mean(xbar)
+var(xbar)
+```
+
+This works with non-uniform distribution. This is the beauty of central limit theorem (CLT). 
+
+```{r}
+x = rexp(n=100, rate=1)
+hist(x, main="Sample Distribution")
+R = 100000
+xbar = double(R)
+for(r in 1:R){
+  x = rexp(n=100, rate=1)
+  xbar[r] = mean(x)
+}
+hist(xbar, main="Sampling Distribution of Xbar")
+mean(xbar)
+var(xbar)
+```
+
+To convert to standard normal distribution we can use 
+
+$Z = \frac{\bar{X}-\mu_p}{\sigma_p} = \frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}}$
+
+### Proportions - When value is qualitative
+
+This works for proportions (when value is nominal or ordinal). 
+Lets say population parameter is $\pi$ and sample population is represented by *p* where $*p* = X / n$, where *X* is items in sample with the characteristic.  ]
+Then, $\mu_p = \pi$ and $\sigma_p =\sqrt{\frac{\pi(1-\pi)}{n}}$
+and converting to standardized normal distribution we get, $Z = \frac{p-\pi}{\sigma_p} = \frac{p-\pi}{\sqrt{\frac{\pi(1-\pi)}{n}}}$
+
+### Magic Numbers - Rule of Thumb
+
+* For most distributions, n > 30 will give a sampling distribution that is nearly normal.
+* For fairly symmetric distributions, n > 15 is large enough.
+* For a normal population distribution, the sampling distribution of the mean is always normally distributed.
+* For propotions, $n\pi \ge 5$ and $n(1-\pi) \ge 5$
+
+## Confidence Intervals
+Confidence Intervals (CI) is represented as $1 - \alpha$ and shown as % level of confidence. Hence, 95% CU means $1 - \alpha = .95$ and $\alpha = 0.05$ or 5%  and $\frac{\alpha}{2} = .025$ or 2.5%. 
+
+ CI = PE $\pm$ (Critical Value) (Standard Error), where PE refers to point estimate, and Critical Value refers to cut off of the Z-Score or t-Value. Standard Error refers to $\frac{\sigma}{\sqrt{n}}$
+ 
+###Same notations
+
+| Syntax      | Population | Sample    |
+| :---        |    :----:   |   ---: |
+| Mean    | $\mu$     | $\bar{X}$  |
+| Standard Deviation   | $\sigma$        | $S$    |
+| Proportion |$\pi$|$p$
+
+### Formula for different scenerios
+ * For estimating population mean with known population standard deviation $\sigma$ 
+ $$
+ CI = \bar{X} \pm Z_\frac{\alpha}{2}\frac{\sigma}{\sqrt{n}}
+ $$
+ 
+ * For estimating population mean with unknown population standard deviation  $\sigma$, we use sample standard deviation $S$
+ $$
+  CI = \bar{X} \pm t_\left(df,_\frac{\alpha}{2}\right)\frac{\mathrm{S}}{\sqrt{n}}
+ $$
+ 
+ * For estimation population proportion $\pi$, 
+ $$
+ CI = \mathrm{p} \pm Z_\frac{\alpha}{2} \sqrt{\frac{\mathrm{p}\left(1 - \mathrm{p} \right)}{\mathrm{n}}}
+ $$
+The interpretation of confidence intervals is: if repeated samples were taken from the population and the 95% confidence interval computed for each sample, 95% of the intervals would contain the population mean in the long run. Let’s see if we can simulate the implication with R. 
+
+Say we send a few students to the food hall to sample and measure the mean weight of the soda in ounces. They each take a sample of 20 sodas, and construct a 95% confidence interval from their sample. For example, the following would be one possible realization of a confidence interval computed in this manner:
+
+```{r}
+library("BSDA")
+soda.batch <- rnorm(n = 20, mean = 40, sd = 2)
+test3 <- z.test(soda.batch, sigma.x = 2, conf.level = 0.95)
+test3$conf.int
+# Lets do this a 1000 times!
+attempts = 1000
+curve(expr = dnorm(x, mean = 40, sd = 2), from = 33, to = 48,
+      main = "95% CI simulation results for sample size = 20",
+      xlab = "Soda Weight (in oz)", ylab = "Density",
+      lwd=2, col="blue")
+abline(v = 40, col = "purple", lwd = 2)
+failed_to_contain <- 0
+for (i in 1:attempts) {
+    col <- rgb(0,0,0,0.5)
+    soda.batch <- rnorm(n = 20, mean = 40, sd = 2) 
+    myCI <- z.test(soda.batch, sigma.x = 2, conf.level = 0.95)$conf.int
+    if (min(myCI) > 40 | max(myCI) < 40) {
+        failed_to_contain <- failed_to_contain + 1
+        col <- rgb(1,0,0,1)
+    }
+    segments(min(myCI), 0.2 * i / attempts,
+             max(myCI), 0.2 * i / attempts,
+             lwd = 1, col = col)
+}
+failed_to_contain
+failed_to_contain / attempts
+# OR you can use CI Sim
+CIsim(samples=1000,n=20,mu=40,sigma=2,conf.level = .95,type = "Mean")
+```
+
+```{r}
+# In a large soda you are suppose to get 40 ounces. However, the machine can sometimes dispense more of less soda. It is estimated the standard deviation is 2 ounces. Lets simulate this process. 
+
+set.seed(1)
+soda <- rnorm(10000, mean = 40, sd = 2)
+hist(soda, freq = FALSE, main = "Soda Histogram", xlab = "Weight")
+curve(dnorm(x, mean = 40, sd = 2), col = "blue", add = TRUE)
+summary(soda)
+library("BSDA")
+# When we know population standard deviation
+test1 <- z.test(soda, sigma.x = 2, conf.level = 0.95)
+test1$conf.int
+# when we do not know population standard deviation
+test2 <- t.test(soda, conf.level = 0.95)
+test2$conf.int
+```
+
+## Calculate Sample Size
+A required sample size can be found for a desired margin of error $\mathrm{e}$  with a specified level of confidence $\left(1 - \alpha \right)$
+
+Margin of error is also called sampling error. Hence $\mathrm{e}$ can be calculated as 
+$$
+\mathrm{e} = \mathrm{Z}_\frac{\alpha}{2}\frac{\sigma}{\sqrt{\mathrm{n}}}
+$$
+* For calculating sample size for  known $\sigma$ or unknown $\sigma$ calculated from $\mathrm{S}$ or estimated based on what you think max $\sigma$
+
+$$
+ n = \frac{\mathrm{Z}^2_\frac{\alpha}{2}\sigma^2}{\mathrm{e}^2}
+$$
+* For calculating required sample size for proportions 
+
+$$
+n = \frac{Z_\frac{\alpha}{2}^2\pi\left(1-\pi\right)}{\mathrm{e}^2}
+$$
+
+
+
+

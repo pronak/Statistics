@@ -1,0 +1,30 @@
+---
+title: "Importing_Climate_Data"
+author: "pronak@business.rutgers.edu"
+date: "3/30/2022"
+output: html_document
+---
+#File Middlesex.csv is saved on my desktop
+#I copied and pasted the values from https://climate.rutgers.edu/stateclim_v1/nclimdiv/index.php?stn=NJ023&elem=avgt. 
+# I saved the file as .csv and not .xlsx
+# I will import the data using "File"->"Import Dataset"-> "From Text (base)"
+```{r echo=FALSE, warning=FALSE}
+#File Middlesex.csv is saved on my desktop
+#I copied and pasted the values from https://climate.rutgers.edu/stateclim_v1/nclimdiv/index.php?stn=NJ023&elem=avgt. 
+# I saved the file as .csv and not .xlsx
+# I will import the data using "File"->"Import Dataset"-> "From Text (base)"
+Middlesex <- read.csv("~/Desktop/Middlesex.csv")
+View(Middlesex)
+# Import also runs View as a verification step. 
+# Let check how R stores this. 
+class(Middlesex)
+# Plot a Line Chart
+plot(Middlesex$Jan,type="l",x=Middlesex$Year,col="Red")
+# Add Another Line
+lines(Middlesex$Feb,type="l",x=Middlesex$Year,col="Blue")
+# Add legend
+legend("topleft", legend=c("Jan", "Feb"),
+       col=c("Red", "Blue"), lty = 1:2, cex=0.8)
+```
+
+

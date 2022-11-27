@@ -1,0 +1,207 @@
+---
+title: "Hypothesis Testing"
+author: "pronak@business.rutgers.edu"
+date: "3/19/2022"
+output: html_document
+---
+
+## Definitions
+
+**Hypothesis** is a ~~claim~~ assertion about a population parameter [$\mu$ or $\pi$], not sample statistic [$\bar{X}$ or $\hat{\mathrm{p}}$]
+
+**Null Hypothesis** is an assertion to be tested. It is represented as $H_0$. As an example, if a manufacturer claims the car gives 20 mpg on highway, then $H_0: \mu= 20$ mpg. You will notice that the null hypothesis always has a sign. In addition, we always start with the assumption that Null Hypothesis is always True. 
+
+**Alternative Hypothesis** is the opposite of the $H_0$. It is represented as $H_1$. Similar to the Null Hypothesis, Alternative Hypothesis always has a sign. With the previous example, $H_1: \mu \ne 20$
+
+**Type I Error**
+Rejecting a TRUE $H_0$. It is a "False Alarm". It is set by the researcher and also called "Level of Significance" of a test. 
+
+**Alpha**
+The probability of Type 1 Error. It is represented as $\alpha$
+
+**Confidence**
+$(1 - \alpha)$. Probability of not rejected $H_0$ when its TRUE. It is also known as confidence coefficient. 
+
+**Confidence Level of Hypothesis Test**
+$(1-\alpha)*100$
+
+**Type II Error**
+Failure to reject a FALSE $H_0$. It represents a "Missed Opportunity".
+
+**Beta**
+The probability of Type 2 Error. It is represented as $\beta$
+
+**Power**
+$(1-\beta)$. Probability of rejecting $H_0$ when it is FALSE.It is also referred to as Power of Statistical Test.
+
+**Two-Tail Test**
+Has rejection region on both tails. Hence, $\alpha$ is split  on each side by $\alpha/2$.
+
+**One-Tail Test**
+Has rejection region on one tail. $\alpha$ is *NOT* split
+
+**p-Value**
+Probability of obtaining a test statistic equal to or more extreme than the observed sample value given $H_0$ is TRUE. Also called the observed level of significance and is the smallest value of $\alpha$ for which $H_0$ can be rejected. "If p-value is low, $H_0$ must GO!!!"
+
+## Outcomes of Hypothesis Testing
+||Actual Situation
+-------------|-------------|-------------
+Decision | $H_0$ True|$H_0$ False
+Do Not Reject $H_0$ | $1-\alpha$ (Confidence)|$\beta$ (Type II)
+Reject $H_0$  | $\alpha$ (Type I)|$1-\beta$ (Power)
+
+*Note*
+
+* $\alpha$ and $\beta$ cannot happen at the same time. 
+* As $\alpha$ increases, $\beta$ decreases.
+
+*Remember*
+
+All Else being equal
+
+* As $\sigma$ &uarr; , $\beta$ &uarr;
+* As $\mathrm{n}$ &darr; , $\beta$ &uarr;
+* As $\alpha$ &darr; , $\beta$ &uarr;
+* As $(\mu-\bar{X})$ &darr; , $\beta$ &uarr;
+
+## Critical Value of Test Statistic
+
+### Formulas 
+
+When $\sigma$ is known,  use the Z-test to determine the test statistic by using the formula
+
+$$Z_{STAT}= \frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}}$$
+When $\sigma$ is unknown, use the t-test to determine the test statistic by using the formula
+$$t_{STAT}= \frac{\bar{X}-\mu}{\frac{\mathrm{S}}{\sqrt{n}}}$$
+where $\mathrm{S}$ is the sample standard deviation.
+
+When we are dealing with proportions 
+
+$$Z_{STAT}= \frac{\mathrm{p}-\pi}{\sqrt{\frac{\pi(1-\pi)}{n}}}$$
+
+## Process of Hypothesis Testing
+1. Identify ${H_0}$ and ${H_1}$
+2. Choose $\alpha$ and sample size $\mathrm{n}$
+3. Determine the appropriate test statistic and sampling distribution.Use Z-test distribution if $\sigma$ is known or t-test distribution if $\sigma$ is unknown. 
+4. Determine the critical values that divide the rejection and non rejection regions using one of the formulas above.
+5. Sample from the population and find the mean $\bar{X}$ and compute the test statistic. 
+6. If $\bar{X}$ is close to the $\mu$ and hence in the non-rejection region, then $H_0$ is not rejected. If $\bar{X}$ is far away from the $\mu$ and hence in the rejection region, then $H_0$ is rejected. 
+7. OR if p-Value < $\alpha$, Reject $H_0$. If p-Value $\ge \alpha $ do not reject $H_0$
+
+## Comparing two independent population parameters
+
+### Means with unknown std. dev but assumed equal
+
+**Pooled Variance**
+$$
+\mathrm{S}_p^2 = \frac{(n_1-1)\mathrm{S}_1^2+(n_2 -1)\mathrm{S}_2^2}{(n_1-1)+(n_2 -1)}
+$$
+**t-Statistic**
+$$t_{STAT}= \frac{(\bar{X_1}-\bar{X_2})-(\mu_1-\mu_2)}{\sqrt{\mathrm{S}_p^2 (\frac{1}{n_1}+\frac{1}{n_2})}}$$
+**Confidence Interval**
+$$
+(\bar{X_1}-\bar{X_2}) \pm t_\frac{\alpha}{2}\sqrt{\mathrm{S}_p^2 (\frac{1}{n_1}+\frac{1}{n_2})}
+$$
+**Degrees of Freedom**
+$d.f =(n_1+n_2-2)$
+
+### Proportions for two populations
+
+**Assumptions**
+
+* $n_1\pi_1 \ge 5$
+* $n_2\pi_2 \ge 5$
+* $n_1(1- \pi_1) \ge 5$
+* $n_2 (1 - \pi_2) \ge 5$
+
+**Pooled Estimate**
+$$
+\bar{p} = \frac{X_1+X_2}{n_1+n_2}
+$$
+
+**Z-Statistic**
+For proportions we used Z Statistic (not t)
+
+$$
+Z_{STAT} = \frac{(p_1-p_2)-(\pi_1 - \pi_2)}{\sqrt{\bar{p}(1-\bar{p})(\frac{1}{n_1}+\frac{1}{n_2})}}
+$$
+where $p_1=\frac{X_1}{n_1}$ and $p_2=\frac{X_2}{n_2}$
+
+**Confidence Interval**
+$$
+(p_1-p_2)\pm Z_\frac{\alpha}{2}\sqrt{\frac{p_1(1-p_1)}{n_1}+\frac{p_2(1-p_2)}{n_2}}
+$$
+
+### Ratio of two population variances
+
+**Hypothesis**
+
+* $H_0: \sigma_1^2 = \sigma_2^2$, $H_1: \sigma_1^2 \ne \sigma_2^2$
+* $H_0: \sigma_1^2 \le \sigma_2^2$, $H_1: \sigma_1^2 > \sigma_2^2$
+
+**Formula**
+$F_{STAT} = \frac{S_1^2}{S_2^2}$, where $df_1=n_1-1$ and $df_2=n_2-1$
+and 
+
+* $S_1^2$ = Variance of Sample 1, the larger sample variance
+* $S_2^2$ = Variance of Sample 2, the smaller sample variance
+* $n_1$ = Sample size of sample 1, the larger sample
+* $n_2$ = Sample size of sample 2, the smaller sample
+* There are two degrees of freedom required: numerator and denominator. The larger sample variance is always the numerator.
+* In a F-Table, numerator degrees of freedom determine the column and denominator degrees of freedom determine the row.
+
+The F critical value is found from the F Table or using the "qf" function in R. Here, the example shows \aphla as .05 for a two tail test and row degree of freedom (df) is 20 and column df is 24. 
+```{r}
+qf(.025,20,24,lower.tail = FALSE)
+```
+
+### Comparing BEFORE and AFTER: Paired Difference Test
+
+The $i^{th}$ paired difference is defind as $D_i$ where
+
+$D_i = X_{1i} - X_{2i}$ 
+where 1 is observation in BEFORE and 2 is the same observation AFTER the treatment. 
+
+The point estimate of the paired difference population mean is $\mu_D$ is $\bar{D} = \frac{\sum_{i=1}^{n}D_i}{n}$ 
+
+The Sample standard deviation $S_D$ = $\sqrt{\frac{\sum_{i=1}^{n}(D_i-\bar{D})^2}{n-1}}$
+
+The test statistic for $\mu_D$ is 
+$$
+t_{STAT} = \frac{\bar{D}-\mu_D}{\frac{S_D}{\sqrt{n}}}
+$$
+and had $n-1$ d.f
+
+The Confidence Interval for $\mu_D$ is
+$$
+\bar{D}\pm t_\frac{\alpha}{2}\frac{S_D}{\sqrt{n}}
+$$
+
+
+### R Commands
+
+CEO of your company says we should charge $50 per user per month for the product. Your job is to do market research to set a price based on data. You conduct a survey of 30 customers to check how much they are willing to pay. 
+
+$$
+n=30, \bar{X} = 55.7, S^2 = 64.8, \mu = 50, H_0: \mu \le 50, H_1: \mu > 50, \alpha = .01
+
+
+$$
+In our example, we have one parameter ($\mu$) and no population variance. So we will use $t-test$. 
+
+```{r}
+n = 30
+xbar = 55.7
+s2 = 64.8
+mu = 50
+alpha = .01
+t_df = (xbar - mu)/(sqrt(s2/n))
+t_df
+t_critical = qt(alpha,n-1,lower.tail=FALSE)
+t_critical
+p_val = pt(t_df,n-1,lower.tail=FALSE)
+p_val
+if(p_val <= alpha) {print ("Reject H0")}
+if(p_val > alpha) {print ("Dont Reject H0")}
+
+```

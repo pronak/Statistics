@@ -1,0 +1,123 @@
+---
+title: "Chi_Square_Lecture"
+author: "pronak@business.rutgers.edu"
+date: "3/26/2022"
+output: html_document
+---
+
+### Chi Square
+
+**Chi-Square** Measures how far the observed counts from the sample are from the expected counts. It is represented as $\chi^2$. It is used when data has categorical/qualitative variables. In R, categorical values are represented as factor. 
+
+**Formula**
+
+$$
+\chi^2 = \sum_{}\frac{(Observed-Expected)^2}{Expected}
+$$
+
+Since the difference is squared, $\chi^2$ is __never__ negative. 
+
+### Goodness of Fit Test
+Test to see if a sample distribution fits a known or expected distribution. It involved only one population we have taken the random sample from and we are comparing the sample distribution to the known distribution. 
+
+__Note__ The goodness-of-fit test expands the one-proportion z-test. The one-proportion z-test is used if the outcome has only two categories. The goodness-of-fit test is used if you have two or more categories.
+
+$H_0$ = Sample distribution fits the expected population distribution. 
+$H_1$ = Sample distribution __does not__ fit the expected population distribution. 
+
+Degrees of Freedom = $D.F$ = $(number of categories - 1)$
+
+### Test of Independence
+Test to see if two variables/categories from a random sample are independent. It is a way of determining whether two categorical variables are associated with one another in the population. If you are curious if race and smoking are related, you would use this test. 
+
+$H_0$ = Two categories are independent
+$H_1$ = Two categories are dependent 
+
+Degrees of Freedom = $D.F$ = $(number of categories in First Variable - 1)$ *  $(number of categories in Second Variable - 1)$
+
+___Note__ In the test of independence, two variables are observed for each observational unit. In the goodness-of-fit test there is only one observed variable.
+
+
+### Test of Homogeneity
+Test to see if two unknown population have the same distribution as each other. It is a way of determining whether two or more sub-groups of a population share the same distribution of a single categorical variable. As an example, if you are curious if people of different races have the same proportion of smokers to non-smokers, you would preform this test.
+
+__Note__ The test of homogeneity expands on the two-proportion z-test. The two proportion z-test is used when the response variable has only two categories as outcomes and we are comparing two groups. The homogeneity test is used if the response variable has several outcome categories, and we wish to compare two or more groups.
+
+
+$H_0$ = Two population have the same distribution
+$H_1$ = Two population have different distribution
+
+Degrees of Freedom = $D.F$ = $(number of categories in First Variable - 1)$ *  $(number of categories in Second Variable - 1)$
+
+
+### FAQ
+Is the test of homogeneity and independence the same? 
+They are almost same!! The difference is a matter of design. In the test of independence, observational units are collected at random from a population and two categorical variables are observed for each unit. In the test of homogeneity, the data are collected by randomly sampling from each sub-group separately. (Say, 100 blacks, 100 whites, 100 American Indians, and so on.) The null hypothesis is that each sub-group shares the same distribution of another categorical variable. (Say, "chain smoker", "occasional smoker", "non-smoker".) The difference between these two tests is subtle yet important.
+
+| __$\chi^2$ Test__ 	| __Sample__ 	| __Research Question__ 	|
+|---	|---	|---	|
+| __Test of Homogeneity__ 	| Single variable measured on several samples 	| Are the groups homogeneous? As in do they have the same distribution 	|
+| __Test of Independence__ 	| Two variables measured on one sample 	| Are the two categorical variables independent?  	|
+
+
+### R Exercise
+
+
+```{r}
+ship <- as.table(rbind(c(202, 118, 178,215), c(123, 167, 528,698)))
+dimnames(ship) <- list(survived = c("Yes", "No"),class = c("First","Second", "Third","Crew"))
+ship
+
+### Is the probability of survival ship same regardless of the class? 
+
+total_pas = sum(ship)
+total_pas
+total_survived = sum(ship[1,])
+total_survived
+total_died = sum(ship[2,])
+total_died
+prob_of_survivual = total_survived/total_pas
+prob_of_survivual
+prob_of_death = total_died/total_pas
+total_first = sum(ship[,1])
+total_second = sum(ship[,2])
+total_third = sum(ship[,3])
+total_crew = sum(ship[,4])
+exp_first_survival = prob_of_survivual*total_first
+exp_first_death = prob_of_death*total_first
+exp_second_survival = prob_of_survivual*total_second
+exp_second_death = prob_of_death*total_second
+exp_third_survival = prob_of_survivual*total_third
+exp_third_death = prob_of_death*total_third
+exp_crew_survival = prob_of_survivual*total_crew
+exp_crew_death = prob_of_death*total_crew
+c_f_s = (ship[1,1] - exp_first_survival)^2/exp_first_survival
+c_s_s = (ship[1,2] - exp_second_survival)^2/exp_second_survival
+c_t_s = (ship[1,3] - exp_third_survival)^2/exp_third_survival
+c_c_s = (ship[1,4] - exp_crew_survival)^2/exp_crew_survival
+c_f_d = (ship[2,1] - exp_first_death)^2/exp_first_death
+c_s_d = (ship[2,2] - exp_second_death)^2/exp_second_death
+c_t_d = (ship[2,3] - exp_third_death)^2/exp_third_death
+c_c_d = (ship[2,4] - exp_crew_death)^2/exp_crew_death
+chi_sq = c_f_s + c_s_s + c_t_s + c_c_s + c_f_d + c_s_d + c_t_d + c_c_d
+chi_sq
+d_f = (nrow(ship)-1)*(ncol(ship)-1)
+d_f
+probablity = pchisq(q=chi_sq,df=d_f,lower.tail=FALSE)
+probablity
+alpha = 0.05
+critical_c = qchisq(p=alpha,df=d_f,lower.tail = FALSE)
+if(probablity < 0.5){print ("Reject H0")}
+if(chi_sq > critical_c) {print ("Reject H0")}
+
+## SHORT WAY. Chisq.test works for both Homogeneity and Independence
+chisq.test(ship)
+
+## M&M Probabilities : Goodness of Fit Test
+
+M_M <- as.table(rbind(c(.24, .20, .16,.14,.13,.13), c(85, 79, 56,64,58,68)))
+dimnames(M_M) <- list(survived = c("Prob", "Count"),class = c("Blue","Orange","Green","Yellow","Red","Brown"))
+M_M
+
+chisq.test(M_M[2,],p=M_M[1,])
+ ```

@@ -1,0 +1,397 @@
+---
+title: "Regression"
+author: "pronak@business.rutgers.edu"
+date: "4/12/2022"
+output: html_document
+---
+## Assumptions
+
+1. Linearity 
+2. Independence of Errors
+3. Normality of Errors
+4. Equal Variance of Errors
+
+## Formulas 
+
+* Simple Linear Regression Model
+
+$$
+Y_i = \beta_0 + \beta_1X_i + \epsilon_i
+$$
+
+* Regression Prediction Line
+
+$$
+\hat{Y}_i = \beta_0 + \beta_1X_i
+$$
+* Error or Residual
+
+$$
+\epsilon_i = Y_i - \hat{Y}_i
+$$
+
+* Intercept 
+
+$$
+b_1 = \frac{SSXY}{SSX}
+$$
+
+where
+
+$$
+SSXY = \sum_{i=1}^{n}(X_i-\bar{X})(Y_i-\bar{Y})
+$$
+
+=
+
+$$
+\frac{\sum_{i=1}^{n}(X_i)\sum_{i=1}^{n}(Y_i)}{n}
+$$
+* Intercept 
+
+$$
+b_0 = \bar{Y}+b_1\bar{X}
+$$
+
+* Sum of Square Total
+
+$$
+SST = \sum_{i=1}^{n}(Y_i-\bar{Y})^2
+$$
+
+* Sum of Square Regression
+
+$$
+SSR = \sum_{i=1}^{n}(\hat{Y}_i-\bar{Y})^2
+$$
+
+* Sum of Square Error
+
+$$
+SSE = \sum_{i=1}^{n}(Y_i-\hat{Y}_i)^2
+$$
+
+* Coefficient of Determination
+
+$r^2$ is always between 0 and 1 $0 \le r^2 \le 1$
+
+$$
+r^2 = \frac{SSR}{SST} =
+$$
+
+$$
+1 - \frac{SSE}{SST}
+$$
+
+
+* Standard Error of Estimate
+
+$$
+S_{YX} = \sqrt{\frac{SSE}{n-2}}
+$$
+
+* Standard Error of Regression Slope
+
+$$
+S_{b_1} = \frac{S_{YX}}{\sqrt{SSX}}
+$$
+
+* Confidence Interval for **Mean Value of Y** for a given $X_i$
+
+$$
+\hat{Y} \pm t_{\frac{\alpha}{2}}S_{YX}\sqrt{h_i}
+$$ 
+
+* Confidence Interval for **Individual Value of Y** for a given $X_i$
+
+$$
+\hat{Y} \pm t_{\frac{\alpha}{2}}S_{YX}\sqrt{1+ h_i}
+$$ 
+where 
+
+$$
+h_i = \frac{1}{n}+\frac{(X_i - \bar{X})^2}{SSX}
+$$
+$$
+h_i = \frac{1}{n}+\frac{(X_i - \bar{X})^2}{\sum(X_i - \bar{X})^2}
+$$
+
+* F-Test Slope
+
+$$
+F_{STAT} = \frac{MSR}{MSE}
+$$
+$$
+MSR = \frac{SSR}{k}
+$$
+$$
+MSE = \frac{SSE}{n-k-1}
+$$
+
+
+### t-Test for the Slope
+
+$H_0$:  $\beta_1$ = 0
+
+$H_1$: $\beta_1$ $\ne$ 0
+
+$t_{STAT}$ = $\frac{b_1-\beta_1}{S_{b_1}}$
+
+$d.f.$ = n-2
+
+### Confidence Interval Estimate for the Slope
+
+$$
+b_1 \pm t_{\frac{\alpha}{2}}S_{b_1}
+$$
+and 
+
+$$
+d.f. = n-2
+$$
+
+### t-Test for Correlation Coefficient
+
+$H_0$:  $\rho$ = 0
+
+$H_1$: $\rho$ $\ne$ 0
+
+$t_{STAT}$ = $\frac{r - \rho}{\sqrt{\frac{1-r^2}{n-2}}}$
+
+$d.f.$ = n-2
+
+$r$ = + $\sqrt{r^2}$ if $b_1 > 0$ or 
+$r$ = - $\sqrt{r^2}$ if $b_1 < 0$
+
+```{r}
+#install.packages("UsingR")
+library(UsingR)
+
+## Load Data Set
+data(galton)
+
+## Create a Scatter Plot
+
+plot(galton$parent,galton$child,pch=19,col="blue")
+
+## Conduct a linear Model Regression
+  
+lm1 <- lm(galton$child~galton$parent)
+
+## Add Regression Line to the scatter plot
+
+lines(galton$parent, lm1$fitted, col="black",lwd=3)
+
+## Create Sample Record
+
+newGalton <- data.frame(parent=rep(NA,1e6), child=rep(NA,1e6))
+
+## Verify Record
+
+head(newGalton)
+
+## Add Parent Records
+newGalton$parent <- rnorm(1e6,mean=mean(galton$parent), sd=sd(galton$parent))
+
+## Add Child Record
+
+newGalton$child <- lm1$coeff[1] + lm1$coeff[2]*newGalton$parent + rnorm(1e6,sd=sd(lm1$residuals))
+
+## Verify New Data Set
+
+head(newGalton)
+
+
+## Visualize
+smoothScatter(newGalton$parent,newGalton$child)
+abline(lm1,col="red",lwd=3)
+
+
+## Start Taking Samples:
+set.seed(12345)
+sampleGalton1 <- newGalton[sample(1:1e6,50,replace=F),]
+plot(sampleGalton1,pch=19,col="blue")
+sampleLm1 <- lm(sampleGalton1$child~sampleGalton1$parent)
+lines(sampleGalton1$parent,sampleLm1$fitted,lwd=3,lty=2)
+abline(lm1,col="red",lwd=3)
+
+## Take another Sample
+sampleGalton2 <- newGalton[sample(1:1e6,50,replace=F),]
+plot(sampleGalton2,pch=19,col="blue")
+sampleLm2 <- lm(sampleGalton2$child~sampleGalton2$parent)
+lines(sampleGalton1$parent,sampleLm1$fitted,lwd=3,lty=2)
+lines(sampleGalton2$parent,sampleLm2$fitted,lwd=3,lty=3)
+abline(lm1,col="red",lwd=3)
+
+## Take many samples
+
+sampleLm <- vector(100,mode="list")
+for(i in 1:100){ sampleGalton <- newGalton[sample(1:1e6,50,replace=F),];sampleLm[[i]]<- lm(sampleGalton$child~sampleGalton$parent)}
+
+##n Visualize
+
+smoothScatter(newGalton$parent,newGalton$child)
+for(i in 1:100){abline(sampleLm[[i]],lwd=3,lty=2)}
+abline(lm1,col="red",lwd=4)
+
+## Check Histogram of the Coefficients
+
+par(mfrow=c(1,2))
+hist(sapply(sampleLm,function(x){coef(x)[1]}),col="blue",xlab="Intercept",main="")
+hist(sapply(sampleLm,function(x){coef(x)[2]}),col="blue",xlab="Slope",main="")
+
+summary(sampleLm2)$coeff
+confint(sampleLm2,level=0.95)
+
+## End of First Regression!!!! 
+
+
+# Get and load library FPP
+library("fpp")
+
+# Loop at all the variables 
+
+plot(fuel[,-1])
+pairs(fuel[,-1])
+summary(fuel)
+cor(fuel[,-1])
+
+# Assumption of Normality
+hist(fuel$Carbon)
+
+# Assumption of Linearity
+
+plot(Carbon ~ City, data = fuel)
+
+# Lets do a plot of two variables
+
+plot(jitter(Carbon) ~ jitter(City), xlab="City (mpg)", ylab="Carbon footprint (tonnes per year)", data=fuel)
+
+# Simple Linear Regression
+
+fit <- lm(Carbon ~ City, data=fuel)
+fit
+summary(fit)
+anova(fit)
+
+#Draw the regression line in the plot abline(fit)
+# Lets do a residual plot and see what it looks like
+
+res <- residuals(fit)
+plot(jitter(res)~jitter(City), ylab="Residuals", xlab="City", data=fuel)
+
+abline(0,0)
+
+# Lets do some plots to see what R gives for regression plot(fit)
+# On with Forecasting to see the output from regression
+
+fitted(fit)[1]
+
+# ask to do a forecast for predictor = 30
+
+fcast <- forecast(fit, newdata=data.frame(City=30))
+
+# plot the forecast to see the graph
+
+plot(fcast, xlab="City (mpg)", ylab="Carbon footprint (tons per year)")
+
+# Lets ask for some confidence interval for our forecast
+
+confint(fit,level=0.95)
+
+# Lets do a transformation of response and predictors to get a better fit. 
+# Split the plotting output area into 2 columns and 1 row. 
+
+par(mfrow=c(1,2))
+
+# Do a Regression on log of the data.
+
+fit2 <- lm(log(Carbon) ~ log(City), data=fuel)
+# Plot 1
+
+plot(jitter(Carbon) ~ jitter(City), xlab="City (mpg)",
+ylab="Carbon footprint (tonnes per year)", data=fuel)
+
+# Add a line based on the exponents of the fit variables
+
+lines(1:50, exp(fit2$coef[1]+fit2$coef[2]*log(1:50)))
+
+# Plot 2
+
+plot(log(jitter(Carbon)) ~ log(jitter(City)),
+xlab="log City mpg", ylab="log carbon footprint", data=fuel) 
+ 
+#Draw the regression line
+
+abline(fit2)
+
+# Look at the residuals.
+#Store the residuals in a variable
+
+res <- residuals(fit2)
+
+# Lets so the residuals a little bigger 
+par(mfrow=c(1,1))
+plot(jitter(res, amount=.005) ~ jitter(log(City)),
+ylab="Residuals", xlab="log(City)", data=fuel)
+
+# End of Simple Linear Regression Exercise
+
+# Multiple Linear Regression Example View(credit)
+
+# Get Correlation Matrix
+cor(credit)
+
+# Look at the correlation visually 
+
+pairs(credit[,-(4:5)])
+
+# Plot reveals that we need to do a transformation. As some values are zero we will do log +1
+#Lets create a new variable with the logs. 
+
+creditlog <- data.frame(score=credit$score, log.savings=log(credit$savings+1), log.income=log(credit$income+1), log.address=log(credit$time.address+1), log.employed=log(credit$time.employed+1), fte=credit$fte, single=credit$single)
+
+# Now look at correlation 
+
+pairs(creditlog[,1:5])
+
+# Lets do Multiple Regression and do a fit
+
+mfit <- step(lm(score ~ log.savings + log.income + log.address + log.employed + single, data=creditlog))
+
+summary(mfit)
+# Lets plot the original with the predicted. 
+plot(fitted(mfit), creditlog$score, ylab="Score", xlab="Predicted score")
+
+
+# Lets analyse Residuals.
+
+# Lets do 2 rows two columns for our plot
+
+par(mfrow=c(2,2))
+
+plot(creditlog$log.savings,residuals(mfit),xlab="log(savings)") 
+
+plot(creditlog$log.income,residuals(mfit),xlab="log(income)") 
+
+plot(creditlog$log.address,residuals(mfit),xlab="log(address)") 
+
+plot(creditlog$log.employed,residuals(mfit),xlab="log(employed)")
+
+# One more plot of fitted and residuals
+# Back to one column one row for big plots 
+
+par(mfrow=c(1,1))
+
+plot(fitted(mfit), residuals(mfit), xlab="Predicted scores", ylab="Residuals")
+
+# Plot gives multiple graphs for regression analysis 
+plot(mfit)
+
+
+
+# More Outlier measures 
+cooks.distance(mfit) 
+hatvalues(mfit) 
+
+```
